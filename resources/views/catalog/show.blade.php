@@ -13,13 +13,32 @@
         </nav>
 
         <div class="grid gap-9 lg:grid-cols-2 lg:gap-16">
-            <div class="overflow-hidden rounded-[2rem] border border-[#eae2da] bg-white">
-                @if ($product->getFirstMediaUrl('images', 'large'))
-                    <img src="{{ $product->getFirstMediaUrl('images', 'large') }}" alt="{{ $product->name }}" class="aspect-square w-full object-cover">
-                @elseif ($product->getFirstMediaUrl('images'))
-                    <img src="{{ $product->getFirstMediaUrl('images') }}" alt="{{ $product->name }}" class="aspect-square w-full object-cover">
+            <div class="space-y-3">
+                @if ($product->getMedia('images')->isNotEmpty())
+                    <div x-data="{ activeImage: 0 }">
+                        <div class="overflow-hidden rounded-[2rem] border border-[#eae2da] bg-white">
+                            @foreach ($product->getMedia('images') as $index => $image)
+                                <img x-show="activeImage === {{ $index }}" x-cloak
+                                     src="{{ $image->getUrl('large') }}" alt="{{ $product->name }} photo {{ $index + 1 }}"
+                                     class="aspect-square w-full object-cover">
+                            @endforeach
+                        </div>
+                        @if ($product->getMedia('images')->count() > 1)
+                            <div class="mt-3 flex gap-3 overflow-x-auto" role="group" aria-label="Product photos">
+                                @foreach ($product->getMedia('images') as $index => $image)
+                                    <button type="button" @click="activeImage = {{ $index }}"
+                                            :aria-pressed="(activeImage === {{ $index }}).toString()"
+                                            :class="activeImage === {{ $index }} ? 'border-[#85464f]' : 'border-transparent'"
+                                            class="shrink-0 overflow-hidden rounded-xl border-2 border-transparent focus:border-[#85464f]">
+                                        <img src="{{ $image->getUrl('thumb') }}" alt="Show product photo {{ $index + 1 }}"
+                                             class="h-16 w-16 object-cover sm:h-20 sm:w-20">
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
                 @else
-                    <div class="flex aspect-square items-center justify-center bg-[#f8eeec] p-8 text-center">
+                    <div class="flex aspect-square items-center justify-center overflow-hidden rounded-[2rem] border border-[#eae2da] bg-white p-8 text-center">
                         <div><span class="text-5xl text-[#c58f83]" aria-hidden="true">✿</span><p class="mt-3 text-sm text-[#82766d]">Product photo coming soon</p></div>
                     </div>
                 @endif
